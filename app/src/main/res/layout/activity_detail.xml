@@ -6,4 +6,52 @@
     android:layout_height="match_parent"
     tools:context=".DetailActivity">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="263dp"
+        android:layout_height="165dp"
+        android:layout_marginTop="30dp"
+        android:onClick="selectImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/select_image" />
+
+    <EditText
+        android:id="@+id/noteTitleTxt"
+        android:layout_width="285dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:hint="Title"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <EditText
+        android:id="@+id/noteTxt"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:textAlignment="viewStart"
+        app:layout_constraintEnd_toEndOf="@+id/noteTitleTxt"
+        app:layout_constraintStart_toStartOf="@+id/noteTitleTxt"
+        app:layout_constraintTop_toBottomOf="@+id/noteTitleTxt" />
+
+    <Button
+        android:id="@+id/saveBtn"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="saveButtonClicked"
+        android:text="SAVE"
+        app:icon="@drawable/save_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/noteTxt"
+        app:layout_constraintStart_toStartOf="@+id/noteTxt" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
