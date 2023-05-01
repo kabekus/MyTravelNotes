@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.kabekus.mytravelnotes.databinding.ActivityDetailBinding
 import android.Manifest
+import java.io.ByteArrayOutputStream
 
 class DetailActivity : AppCompatActivity() {
     var selectedBitmap : Bitmap? = null
@@ -39,6 +40,33 @@ class DetailActivity : AppCompatActivity() {
         val note = binding.noteTxt.text.toString()
         if (selectedBitmap != null){
             val smallBitmap = createSmallBitmap(selectedBitmap!!,300)
+
+            val outputStream = ByteArrayOutputStream()
+            smallBitmap.compress(Bitmap.CompressFormat.PNG,50,outputStream)
+            val byteArrayImg = outputStream.toByteArray()
+
+            try {
+                val database = this.openOrCreateDatabase("TravelNotes", MODE_PRIVATE,null)
+                database.execSQL("CREATE TABLE IF NOT EXISTS travelNotes " +
+                        "(id INTEGER PRIMARY KEY, note_title VARCHAR, notes VARCHAR, image BLOB)")
+                val sqlString = "INSERT INTO travelNotes (note_title,notes,image)VALUES(?,?,?)"
+                val statement = database.compileStatement(sqlString)
+                statement.bindString(1,noteTitle)
+                statement.bindString(2,note)
+                statement.bindBlob(3,byteArrayImg)
+                statement.execute()
+
+                Toast.makeText(this@DetailActivity,"Save Successful",Toast.LENGTH_LONG).show()
+
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+
+
+
+            val intent = Intent(this@DetailActivity,MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) // Açık ne kadar aktivite varsa kapat ve sadece main aktiviteye dön
+            startActivity(intent)
         }
     }
 
@@ -57,10 +85,10 @@ class DetailActivity : AppCompatActivity() {
             val scaleWidth = height*bitmapRatio
             width = scaleWidth.toInt()
         }
-        return Bitmap.createScaledBitmap(image, width,height,true)
+        return Bitmap.createScaledBitmap(image,width,height,true)
     }
     fun selectImage(view: View){
-        if(Build.VERSION.SDK_INT >= TIRAMISU){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ){
 
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_MEDIA_IMAGES)){
@@ -99,7 +127,7 @@ class DetailActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK){
                  val intentFromResult = result.data
                 if (intentFromResult != null){
-                    val imageData = intent.data
+                    val imageData = intentFromResult.data
                     //binding.imageView.setImageURI(imageData)
                     if (imageData != null){
                         try {
