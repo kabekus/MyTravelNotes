@@ -19,6 +19,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.kabekus.mytravelnotes.databinding.ActivityDetailBinding
 import android.Manifest
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.graphics.BitmapFactory
 import java.io.ByteArrayOutputStream
 
 class DetailActivity : AppCompatActivity() {
@@ -26,6 +29,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailBinding
     private lateinit var activityResultLauncher : ActivityResultLauncher<Intent>
     private lateinit var permissionLauncher : ActivityResultLauncher<String>
+    private lateinit var database : SQLiteDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +37,39 @@ class DetailActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        database = this.openOrCreateDatabase("TravelNotes",Context.MODE_PRIVATE,null)
+
         registerLauncher()
+
+        val intent = intent
+        val info = intent.getStringExtra("info")
+
+        if (info.equals("newNote")){
+            binding.imageView.setImageResource(R.drawable.select_image)
+            binding.noteTitleTxt.setText("")
+            binding.noteTxt.setText("")
+            binding.saveBtn.visibility = View.VISIBLE
+            val selelectedImageBackground = BitmapFactory.decodeResource(applicationContext.resources,R.drawable.select_image)
+            binding.imageView.setImageBitmap(selelectedImageBackground)
+
+        }else{
+            binding.saveBtn.visibility = View.INVISIBLE
+
+            val selectedId = intent.getIntExtra("id",1)
+            val cursor = database.rawQuery("SELECT * FROM travelNotes WHERE id = ?", arrayOf(selectedId.toString()))
+            val noteTitleIx = cursor.getColumnIndex("note_title")
+            val noteIx = cursor.getColumnIndex("notes")
+            val imagIx = cursor.getColumnIndex("image")
+
+            while (cursor.moveToNext()){
+                binding.noteTitleTxt.setText(cursor.getString(noteTitleIx))
+                binding.noteTxt.setText(cursor.getString(noteIx))
+                val byteArray = cursor.getBlob(imagIx)
+                val bitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray.size)
+                binding.imageView.setImageBitmap(bitmap)
+            }
+            cursor.close()
+        }
     }
     fun saveButtonClicked(view : View){
         val noteTitle = binding.noteTitleTxt.text.toString()
@@ -46,7 +82,7 @@ class DetailActivity : AppCompatActivity() {
             val byteArrayImg = outputStream.toByteArray()
 
             try {
-                val database = this.openOrCreateDatabase("TravelNotes", MODE_PRIVATE,null)
+
                 database.execSQL("CREATE TABLE IF NOT EXISTS travelNotes " +
                         "(id INTEGER PRIMARY KEY, note_title VARCHAR, notes VARCHAR, image BLOB)")
                 val sqlString = "INSERT INTO travelNotes (note_title,notes,image)VALUES(?,?,?)"
