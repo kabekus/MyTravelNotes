@@ -35,7 +35,29 @@ class DetailActivity : AppCompatActivity() {
         registerLauncher()
     }
     fun saveButtonClicked(view : View){
+        val noteTitle = binding.noteTitleTxt.text.toString()
+        val note = binding.noteTxt.text.toString()
+        if (selectedBitmap != null){
+            val smallBitmap = createSmallBitmap(selectedBitmap!!,300)
+        }
+    }
 
+    private fun createSmallBitmap(image : Bitmap, maximumSize : Int):Bitmap{
+        var width = image.width
+        var height = image.height
+        val bitmapRatio : Double = width.toDouble() / height.toDouble()
+        if (bitmapRatio > 1){
+            //Landscape
+            width = maximumSize
+            val scaleHeight = width/bitmapRatio
+            height = scaleHeight.toInt()
+        }else{
+            //Portrait
+            height = maximumSize
+            val scaleWidth = height*bitmapRatio
+            width = scaleWidth.toInt()
+        }
+        return Bitmap.createScaledBitmap(image, width,height,true)
     }
     fun selectImage(view: View){
         if(Build.VERSION.SDK_INT >= TIRAMISU){
@@ -69,7 +91,6 @@ class DetailActivity : AppCompatActivity() {
                 activityResultLauncher.launch(intentToGalery)
             }
         }
-
     }
 
     private fun registerLauncher(){
